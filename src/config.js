@@ -94,7 +94,8 @@ function (Settings) {
       'ranges',
       'statisticstrend',
       'multifieldhistogram',
-      'valuehistogram'
+      'valuehistogram',
+      'cardinalityhistogram'
     ]
   });
 });
