@@ -1,8 +1,27 @@
+<style>
+  .retention-tile {
+    width: 20px;
+    height: 20px;
+    margin: 1px;
+    color: black;
+  }
+  .rt-bucket-0 { background: #5E4FA2; }
+  .rt-bucket-1 { background: #3288BD; }
+  .rt-bucket-2 { background: #66C2A5; }
+  .rt-bucket-3 { background: #ABDDA4; }
+  .rt-bucket-4 { background: #E6F598; }
+  .rt-bucket-5 { background: #f6faaa; }
+  .rt-bucket-6 { background: #FEE08B; }
+  .rt-bucket-7 { background: #FDAE61; }
+  .rt-bucket-8 { background: #F46D43; }
+  .rt-bucket-9 { background: #D53E4F; }
+  .rt-bucket-10 { background: #9E0142; }
+</style>
 <div ng-controller='retention' ng-init="init()">
   <table class="small">
     <tr ng-repeat="row in data.rows">
       <td ng-repeat="day in row">
-        <div class="rentetion-tile" bs-tooltip="'hellooooo'" style="width: 100px; height: 100px; background: white; margin: 3px; color: black;">
+        <div class="rentetion-tile rt-bucket-{{Math.floor(day.perc / 10)}}" bs-tooltip="'hellooooo'">
           {{day.perc.toString().slice(0, 4)}}
         </div>
       </td>
