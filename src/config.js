@@ -96,7 +96,8 @@ function (Settings) {
       'multifieldhistogram',
       'valuehistogram',
       'cardinalityhistogram',
-      'uniqhits'
+      'uniqhits',
+      'retention'
     ]
   });
 });

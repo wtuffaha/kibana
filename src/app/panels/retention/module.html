@@ -1,0 +1,13 @@
+<div ng-controller='retention' ng-init="init()">
+  <table class="small">
+    <tr ng-repeat="row in data.rows">
+      <td ng-repeat="day in row" style="border: 1px solid white; padding: 5px 10px;">
+        <div class="rentetion-tile" bs-tooltip="'hellooooo'">
+          {{day.intersection}}
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div style="clear:both"></div>
+</div>
