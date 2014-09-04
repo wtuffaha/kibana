@@ -1,9 +1,9 @@
 <div ng-controller='retention' ng-init="init()">
   <table class="small">
     <tr ng-repeat="row in data.rows">
-      <td ng-repeat="day in row" style="border: 1px solid white; padding: 5px 10px;">
-        <div class="rentetion-tile" bs-tooltip="'hellooooo'">
-          {{day.intersection}}
+      <td ng-repeat="day in row">
+        <div class="rentetion-tile" bs-tooltip="'hellooooo'" style="width: 100px; height: 100px; background: white; margin: 3px; color: black;">
+          {{day.perc.toString().slice(0, 4)}}
         </div>
       </td>
     </tr>

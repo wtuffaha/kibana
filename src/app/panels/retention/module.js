@@ -156,29 +156,23 @@ define([
           return;
         }
 
-        var myinter = function (a1, a2) {
-          var h = {};
-          var i;
-          for (i = 0; i < a1.length; i++) { h[a1[i]] = true; }
-
-          var c = 0;
-          for (i = 0; i < a2.length; i++) { if (h[a2[i]]) { c++; } }
-
-          return c;
-        };
-
         // Make sure we're still on the same query/queries
         if($scope.query_id === query_id) {
           var days = results.aggregations.by_day.buckets;
           var res = _.map(days, function (d, i) {
+            var q1 = _.pluck(d.query_0.uniqs.buckets, 'key');
+            var q1h = {};
+            for (var xi = 0; xi < q1.length; xi++) { q1h[q1[xi]] = true; }
             return _.map(_.range(i, days.length), function (x) {
-              var q1 = _.pluck(d.query_0.uniqs.buckets, 'key');
               var q2 = _.pluck(days[x][numQueries === 1 ? 'query_0' : 'query_1'].uniqs.buckets, 'key');
+              var c = 0;
+              for (i = 0; i < q2.length; i++) { if (q1h[q2[i]]) { c++; } }
 
               return {
                 a_count: q1.length,
                 b_count: q2.length,
-                intersection: myinter(q1, q2),
+                intersection: c,
+                perc: c / q1.length * 100,
                 a_date: d.key,
                 b_date: days[x].key
               };
