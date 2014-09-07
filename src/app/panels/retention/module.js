@@ -17,11 +17,7 @@ define([
   'app',
   'lodash',
   'jquery',
-  'kbn',
-
-  'jquery.flot',
-  'jquery.flot.pie'
-], function (angular, app, _, $, kbn) {
+], function (angular, app, _, $) {
   'use strict';
 
   var module = angular.module('kibana.panels.retention', []);
@@ -86,13 +82,10 @@ define([
     _.defaults($scope.panel,_d);
 
     $scope.init = function () {
-      $scope.hits = 0;
-
       $scope.$on('refresh',function(){
         $scope.get_data();
       });
       $scope.get_data();
-
     };
 
     $scope.get_data = function(segment,query_id) {
@@ -137,71 +130,59 @@ define([
       // Populate the inspector panel
       $scope.inspector = request.toJSON();
 
-      // Then run it
-      var results = $scope.ejs.doSearch(dashboard.indices, request);
-      var numQueries = queries.length;
-
       // Populate scope when we have results
-      results.then(function(results) {
-        $scope.panelMeta.loading = false;
-        if(_segment === 0) {
-          $scope.hits = 0;
-          $scope.data = [];
-          query_id = $scope.query_id = new Date().getTime();
-        }
+      $.ajax({
+        url: '/retention',
+        type: 'POST',
+        data: {indices: dashboard.indices, query: JSON.stringify(request.toJSON())},
+        dataType: 'json',
+        success: function (results) {
+          $scope.panelMeta.loading = false;
+          if(_segment === 0) {
+            $scope.hits = 0;
+            $scope.data = [];
+            query_id = $scope.query_id = new Date().getTime();
+          }
 
-        // Check for error and abort if found
-        if(!(_.isUndefined(results.error))) {
-          $scope.panel.error = $scope.parse_error(results.error);
-          return;
-        }
+          // Make sure we're still on the same query/queries
+          if($scope.query_id === query_id) {
 
-        // Make sure we're still on the same query/queries
-        if($scope.query_id === query_id) {
-          var days = results.aggregations.by_day.buckets;
-          var res = _.map(days, function (d, i) {
-            var q1 = _.pluck(d.query_0.uniqs.buckets, 'key');
-            var q1h = {};
-            for (var xi = 0; xi < q1.length; xi++) { q1h[q1[xi]] = true; }
-            return _.map(_.range(i, days.length), function (x) {
-              var q2 = _.pluck(days[x][numQueries === 1 ? 'query_0' : 'query_1'].uniqs.buckets, 'key');
-              var c = 0;
-              for (i = 0; i < q2.length; i++) { if (q1h[q2[i]]) { c++; } }
-              var perc = c / q1.length * 100;
+            var q1_text = "<strong style='color:" + queries[0].color + ";'>" +
+                (queries[0].alias.length ? queries[0].alias : queries[0].query) + "</strong>";
 
-              var q1_text = "<strong style='color:" + queries[0].color + ";'>" +
-                  (queries[0].alias.length ? queries[0].alias : queries[0].query) + "</strong>";
+            var q2_text = q1_text;
+            if (queries.length > 1) {
+              q2_text = "<strong style='color:" + queries[1].color + ";'>" +
+                (queries[1].alias.length ? queries[1].alias : queries[1].query) + "</strong>";
+            }
 
-              var q2_text = q1_text;
-              if (queries.length > 1) {
-                q2_text = "<strong style='color:" + queries[1].color + ";'>" +
-                  (queries[1].alias.length ? queries[1].alias : queries[1].query) + "</strong>";
-              }
+            var res = _.map(results, function (row) {
+              return _.map(row, function (day) {
+                var perc = day.intersection / day.q1_count * 100;
 
-              var help_text = [
-                "<strong style='font-size: 20px;'>" + perc.toString().slice(0, 4) + '%' + "</strong>",
-                "of those who", q1_text, "(" + q1.length + ")", "<br /> on", d.key_as_string,
-                "did", q2_text, "<br /> on", days[x].key_as_string
-              ].join(' ');
+                var help_text = [
+                  "<strong style='font-size: 20px;'>" + perc.toString().slice(0, 4) + '%' + "</strong>",
+                  "of those who", q1_text, "(" + day.q1_count + ")", "<br /> on", day.q1_key,
+                  "did", q2_text, "<br /> on", day.q2_key
+                ].join(' ');
 
-              return {
-                perc: perc,
-                help_text: help_text
-              };
+                return _.extend({}, day, {
+                  perc: perc,
+                  help_text: help_text
+                });
+              });
             });
-          });
 
-          $scope.data = {
-            queries: queries,
-            rows: res,
-            dates: _.pluck(days, 'key')
-          };
+            $scope.data = {
+              queries: queries,
+              rows: res
+            };
 
-          $scope.$emit('render');
-
-          _.defer(function () {
-            $('.retention-tile').tooltip({html: true});
-          });
+            $scope.$emit('render');
+            $scope.ejs.doSearch(dashboard.indices, $scope.ejs.Request()).then(function () {
+              $('.retention-tile').tooltip({html: true});
+            });
+          }
         }
       });
     };
