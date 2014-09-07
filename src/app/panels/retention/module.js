@@ -167,14 +167,26 @@ define([
               var q2 = _.pluck(days[x][numQueries === 1 ? 'query_0' : 'query_1'].uniqs.buckets, 'key');
               var c = 0;
               for (i = 0; i < q2.length; i++) { if (q1h[q2[i]]) { c++; } }
+              var perc = c / q1.length * 100;
+
+              var q1_text = "<strong style='color:" + queries[0].color + ";'>" +
+                  (queries[0].alias.length ? queries[0].alias : queries[0].query) + "</strong>";
+
+              var q2_text = q1_text;
+              if (queries.length > 1) {
+                q2_text = "<strong style='color:" + queries[1].color + ";'>" +
+                  (queries[1].alias.length ? queries[1].alias : queries[1].query) + "</strong>";
+              }
+
+              var help_text = [
+                "<strong style='font-size: 20px;'>" + perc.toString().slice(0, 4) + '%' + "</strong>",
+                "of those who", q1_text, "(" + q1.length + ")", "<br /> on", d.key_as_string,
+                "did", q2_text, "<br /> on", days[x].key_as_string
+              ].join(' ');
 
               return {
-                a_count: q1.length,
-                b_count: q2.length,
-                intersection: c,
-                perc: c / q1.length * 100,
-                a_date: d.key,
-                b_date: days[x].key
+                perc: perc,
+                help_text: help_text
               };
             });
           });
@@ -186,6 +198,10 @@ define([
           };
 
           $scope.$emit('render');
+
+          _.defer(function () {
+            $('.retention-tile').tooltip({html: true});
+          });
         }
       });
     };
@@ -200,106 +216,6 @@ define([
       }
       $scope.refresh =  false;
       $scope.$emit('render');
-    };
-  });
-
-
-  module.directive('retentionChart', function(querySrv) {
-    return {
-      restrict: 'A',
-      link: function(scope, elem) {
-
-        // Receive render events
-        scope.$on('render',function(){
-          render_panel();
-        });
-
-        // Function for rendering panel
-        function render_panel() {
-          // IE doesn't work without this
-          elem.css({height:scope.panel.height||scope.row.height});
-
-          try {
-            _.each(scope.data,function(series) {
-              series.label = series.info.alias;
-              series.color = series.info.color;
-            });
-          } catch(e) {return;}
-
-          // Populate element
-          try {
-            // Add plot to scope so we can build out own legend
-            if(scope.panel.chart === 'bar') {
-              scope.plot = $.plot(elem, scope.data, {
-                legend: { show: false },
-                series: {
-                  lines:  { show: false, },
-                  bars:   { show: true,  fill: 1, barWidth: 0.8, horizontal: false },
-                  shadowSize: 1
-                },
-                yaxis: { show: true, min: 0, color: "#c8c8c8" },
-                xaxis: { show: false },
-                grid: {
-                  borderWidth: 0,
-                  borderColor: '#eee',
-                  color: "#eee",
-                  hoverable: true,
-                },
-                colors: querySrv.colors
-              });
-            }
-            if(scope.panel.chart === 'pie') {
-              scope.plot = $.plot(elem, scope.data, {
-                legend: { show: false },
-                series: {
-                  pie: {
-                    innerRadius: scope.panel.donut ? 0.4 : 0,
-                    tilt: scope.panel.tilt ? 0.45 : 1,
-                    radius: 1,
-                    show: true,
-                    combine: {
-                      color: '#999',
-                      label: 'The Rest'
-                    },
-                    stroke: {
-                      width: 0
-                    },
-                    label: {
-                      show: scope.panel.labels,
-                      radius: 2/3,
-                      formatter: function(label, series){
-                        return '<div ng-click="build_search(panel.query.field,\''+label+'\')'+
-                          ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
-                          label+'<br/>'+Math.round(series.percent)+'%</div>';
-                      },
-                      threshold: 0.1
-                    }
-                  }
-                },
-                //grid: { hoverable: true, clickable: true },
-                grid:   { hoverable: true, clickable: true },
-                colors: querySrv.colors
-              });
-            }
-          } catch(e) {
-            elem.text(e);
-          }
-        }
-
-        var $tooltip = $('<div>');
-        elem.bind("plothover", function (event, pos, item) {
-          if (item) {
-            var value = scope.panel.chart === 'bar' ?
-              item.datapoint[1] : item.datapoint[1][0][1];
-            $tooltip
-              .html(kbn.query_color_dot(item.series.color, 20) + ' ' + item.series.label + " (" + value.toFixed(0) + ")")
-              .place_tt(pos.pageX, pos.pageY);
-          } else {
-            $tooltip.remove();
-          }
-        });
-
-      }
     };
   });
 });

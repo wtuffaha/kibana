@@ -2,8 +2,15 @@
   .retention-tile {
     width: 20px;
     height: 20px;
-    margin: 1px;
     color: black;
+    margin-right: 1px;
+    display: inline-block;
+    border-radius: 3px;
+  }
+  .palette-header {
+    display: inline-block;
+    vertical-align: top;
+    margin: 2px;
   }
   .rt-bucket-0 { background: #5E4FA2; }
   .rt-bucket-1 { background: #3288BD; }
@@ -16,17 +23,27 @@
   .rt-bucket-8 { background: #F46D43; }
   .rt-bucket-9 { background: #D53E4F; }
   .rt-bucket-10 { background: #9E0142; }
+
+  .retention-row {
+    margin-bottom: -3px;
+  }
+
+  .tooltip.in {
+    opacity: 0.95;
+  }
 </style>
+
 <div ng-controller='retention' ng-init="init()">
-  <table class="small">
-    <tr ng-repeat="row in data.rows">
-      <td ng-repeat="day in row">
-        <div class="rentetion-tile rt-bucket-{{Math.floor(day.perc / 10)}}" bs-tooltip="'hellooooo'">
-          {{day.perc.toString().slice(0, 4)}}
-        </div>
-      </td>
-    </tr>
-  </table>
+  <span class="palette-header">0%</span>
+  <div ng-repeat="x in _.range(11)" class="retention-tile rt-bucket-{{x}}"></div>
+  <span class="palette-header">100%</span>
+
+  <br />
+  <br />
+  <div class="retention-row" ng-repeat="row in data.rows">
+    <div ng-repeat="day in row" class="retention-tile rt-bucket-{{Math.floor(day.perc / 10)}}" data-toggle="tooltip" title="{{day.help_text}}">
+    </div>
+  </div>
 
   <div style="clear:both"></div>
 </div>
