@@ -31,15 +31,41 @@
   .tooltip.in {
     opacity: 0.95;
   }
+
+  .histogram-options {
+    padding: 5px;
+    margin-right: 15px;
+    margin-bottom: 0px;
+  }
+  .histogram-options label {
+    margin: 0px 0px 0px 10px !important;
+  }
+  .histogram-options span {
+    white-space: nowrap;
+  }
+
+  /* this is actually should be in bootstrap */
+  .form-inline .checkbox {
+      display: inline-block;
+  }
 </style>
 
 <div ng-controller='retention' ng-init="init()">
-  <div class="checkbox">
-    <label class="small">
-      <input type="checkbox" ng-model="panel.absolutes" ng-checked="panel.absolutes" ng-change="render()">
-      Absolute Vodka
-    </label>
-  </div>
+  <form class="form-inline bordered histogram-options">
+    <span>
+      <div class="checkbox">
+        <label class="small">
+          <input type="checkbox" ng-model="panel.absolutes" ng-checked="panel.absolutes" ng-change="render()">
+          Absolute values
+        </label>
+      </div>
+    </span>
+    <span>
+      <label class="small">Interval</label> <select ng-change="get_data();" class="input-small" ng-model="panel.interval" ng-options="time for time in _.union([panel.interval], panel.intervals)"> </select>
+    </span>
+  </form>
+
+  <br />
   <div ng-show="!panel.absolutes">
     <span class="palette-header">0%</span>
     <div ng-repeat="x in _.range(11)" class="retention-tile rt-bucket-{{x}}"></div>

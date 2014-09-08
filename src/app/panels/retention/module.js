@@ -46,6 +46,8 @@ define([
       time_field : '@timestamp',
       spyable : true,
       absolutes : false,
+      intervals : ['day','week','month'],
+      interval : 'day',
       /** 
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
@@ -88,7 +90,7 @@ define([
 
       var dateAgg = $scope.ejs.DateHistogramAggregation('by_day')
                            .field('@timestamp')
-                           .interval('1d');
+                           .interval($scope.panel.interval);
 
       _.each(queries, function(q) {
         // Exclude the time filters.
