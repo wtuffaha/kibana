@@ -34,14 +34,53 @@
 </style>
 
 <div ng-controller='retention' ng-init="init()">
-  <span class="palette-header">0%</span>
-  <div ng-repeat="x in _.range(11)" class="retention-tile rt-bucket-{{x}}"></div>
-  <span class="palette-header">100%</span>
+  <div class="checkbox">
+    <label class="small">
+      <input type="checkbox" ng-model="panel.absolutes" ng-checked="panel.absolutes" ng-change="render()">
+      Absolute Vodka
+    </label>
+  </div>
+  <div ng-show="!panel.absolutes">
+    <span class="palette-header">0%</span>
+    <div ng-repeat="x in _.range(11)" class="retention-tile rt-bucket-{{x}}"></div>
+    <span class="palette-header">100%</span>
 
-  <br />
-  <br />
-  <div class="retention-row" ng-repeat="row in data.rows">
-    <div ng-repeat="day in row" class="retention-tile rt-bucket-{{Math.floor(day.perc / 10)}}" data-toggle="tooltip" title="{{day.help_text}}">
+    <br />
+    <br />
+    <div class="retention-row" ng-repeat="row in data.rows">
+      <div ng-repeat="day in row" class="retention-tile rt-bucket-{{Math.floor(day.perc / 10)}}"
+        data-toggle="tooltip" title="
+          <strong style='font-size: 20px;'>{{day.perc.toString().slice(0, 4)}}%</strong>
+          of those who {{data.q1_text}} ({{day.q1_count}})
+          <br />
+          on {{day.q1_key.slice(0, 10)}}
+          did {{data.q2_text}}
+          <br />
+          on {{day.q2_key.slice(0, 10)}}
+        ">
+      </div>
+    </div>
+  </div>
+
+  <div ng-show="panel.absolutes">
+    <span class="palette-header">0</span>
+    <div ng-repeat="x in _.range(11)" class="retention-tile rt-bucket-{{x}}"></div>
+    <span class="palette-header">{{data.max}}</span>
+
+    <br />
+    <br />
+    <div class="retention-row" ng-repeat="row in data.rows">
+      <div ng-repeat="day in row" class="retention-tile rt-bucket-{{Math.floor(day.intersection / (data.max / 10))}}"
+        data-toggle="tooltip" title="
+          <strong style='font-size: 20px;'>{{day.intersection}}</strong>
+          of those who {{data.q1_text}} ({{day.q1_count}})
+          <br />
+          on {{day.q1_key.slice(0, 10)}}
+          did {{data.q2_text}}
+          <br />
+          on {{day.q2_key.slice(0, 10)}}
+        ">
+      </div>
     </div>
   </div>
 

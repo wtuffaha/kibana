@@ -44,31 +44,9 @@ define([
     var _d = {
       style   : { "font-size": '10pt'},
       time_field : '@timestamp',
-      /** @scratch /panels/retention/3
-       *
-       * === Parameters
-       *
-       * arrangement:: The arrangement of the legend. horizontal or vertical
-       */
-      arrangement : 'horizontal',
-      /** @scratch /panels/retention/3
-       * chart:: bar, pie or none
-       */
-      chart       : 'bar',
-      /** @scratch /panels/retention/3
-       * counter_pos:: The position of the legend, above or below
-       */
-      counter_pos : 'above',
-      /** @scratch /panels/retention/3
-       * donut:: If the chart is set to pie, setting donut to true will draw a hole in the midle of it
-       */
-      labels  : true,
-      /** @scratch /panels/retention/3
-       * spyable:: Setting spyable to false disables the inspect icon.
-       */
       spyable : true,
-      /** @scratch /panels/retention/5
-       *
+      absolutes : false,
+      /** 
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -146,6 +124,13 @@ define([
 
           // Make sure we're still on the same query/queries
           if($scope.query_id === query_id) {
+            var res = _.map(results, function (row) {
+              return _.map(row, function (day) {
+                return _.extend({}, day, {
+                  perc: day.intersection / day.q1_count * 100,
+                });
+              });
+            });
 
             var q1_text = "<strong style='color:" + queries[0].color + ";'>" +
                 (queries[0].alias.length ? queries[0].alias : queries[0].query) + "</strong>";
@@ -156,26 +141,12 @@ define([
                 (queries[1].alias.length ? queries[1].alias : queries[1].query) + "</strong>";
             }
 
-            var res = _.map(results, function (row) {
-              return _.map(row, function (day) {
-                var perc = day.intersection / day.q1_count * 100;
-
-                var help_text = [
-                  "<strong style='font-size: 20px;'>" + perc.toString().slice(0, 4) + '%' + "</strong>",
-                  "of those who", q1_text, "(" + day.q1_count + ")", "<br /> on", day.q1_key,
-                  "did", q2_text, "<br /> on", day.q2_key
-                ].join(' ');
-
-                return _.extend({}, day, {
-                  perc: perc,
-                  help_text: help_text
-                });
-              });
-            });
-
             $scope.data = {
+              q1_text: q1_text,
+              q2_text: q2_text,
               queries: queries,
-              rows: res
+              rows: res,
+              max: _.max(_.pluck(_.flatten(res), 'intersection'))
             };
 
             $scope.$emit('render');
