@@ -6,6 +6,8 @@
     margin-right: 1px;
     display: inline-block;
     border-radius: 3px;
+    border: 1px solid #333;
+    box-sizing: border-box;
   }
   .palette-header {
     display: inline-block;
@@ -67,16 +69,20 @@
 
   <br />
   <div ng-show="!panel.absolutes">
-    <span class="palette-header">0%</span>
+    <span class="palette-header">
+      <select ng-change="render();" class="input-smaller" ng-model="panel.min_perc" ng-options="x + '%' for x in _.range(0, 100, 10)"> </select>
+    </span>
     <div ng-repeat="x in _.range(11)" class="retention-tile rt-bucket-{{x}}"></div>
-    <span class="palette-header">100%</span>
+    <span class="palette-header">
+      <select ng-change="render();" class="input-smaller" ng-model="panel.max_perc" ng-options="x + '%' for x in _.range(10, 101, 10).reverse()"> </select>
+    </span>
 
     <br />
     <br />
     <div class="retention-row" ng-repeat="row in data.rows">
-      <div ng-repeat="day in row" class="retention-tile rt-bucket-{{Math.floor(day.perc / 10)}}"
+      <div ng-repeat="day in row" class="retention-tile rt-bucket-{{Math.floor((day.perc - panel.min_perc) / (panel.max_perc - panel.min_perc) * 10)}}"
         data-toggle="tooltip" title="
-          <strong style='font-size: 20px;'>{{day.perc.toString().slice(0, 4)}}%</strong>
+          <strong style='font-size: 20px;'>{{day.perc.toString().slice(0, 4)}}%</strong> ({{day.intersection}})
           of those who {{data.q1_text}} ({{day.q1_count}})
           <br />
           on {{day.q1_key.slice(0, 10)}}

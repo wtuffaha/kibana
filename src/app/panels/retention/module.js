@@ -48,6 +48,8 @@ define([
       absolutes : false,
       intervals : ['day','week','month'],
       interval : 'day',
+      min_perc : 0,
+      max_perc : 100,
       /** 
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
