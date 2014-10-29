@@ -103,7 +103,7 @@ define([
 
         var filterAgg = $scope.ejs.FilterAggregation('query_' + q.id)
                                   .filter($scope.ejs.QueryFilter(_q));
-        var termsAgg = $scope.ejs.TermsAggregation('uniqs').field($scope.panel.interval).size(0);
+        var termsAgg = $scope.ejs.TermsAggregation('uniqs').field($scope.panel.field).size(0);
 
         dateAgg.agg(filterAgg.agg(termsAgg));
       });
