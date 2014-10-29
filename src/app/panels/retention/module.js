@@ -46,8 +46,9 @@ define([
       time_field : '@timestamp',
       spyable : true,
       absolutes : false,
-      intervals : ['day','week','month'],
+      intervals : ['hour', 'day','week','month'],
       interval : 'day',
+      field    : 'user.uid',
       min_perc : 0,
       max_perc : 100,
       /** 
@@ -102,7 +103,7 @@ define([
 
         var filterAgg = $scope.ejs.FilterAggregation('query_' + q.id)
                                   .filter($scope.ejs.QueryFilter(_q));
-        var termsAgg = $scope.ejs.TermsAggregation('uniqs').field('user.uid').size(0);
+        var termsAgg = $scope.ejs.TermsAggregation('uniqs').field($scope.panel.interval).size(0);
 
         dateAgg.agg(filterAgg.agg(termsAgg));
       });
